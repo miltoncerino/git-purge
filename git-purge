@@ -1,0 +1,39 @@
+#!/bin/bash
+# save this file as /usr/local/bin/git-purge; chwon 755 /usr/local/bin/git-purge
+# -rwxr-xr-x 1 root root 912 Apr  1 10:47 /usr/local/bin/git-purge*
+set -e
+
+COLOR_RED='\033[0;31m'
+COLOR_GREEN='\033[0;32m'
+COLOR_STANDARD='\033[0m'
+
+function print_ok {
+    printf "\n${COLOR_GREEN}${1}${COLOR_STANDARD}\n"
+}
+
+function print_error {
+    printf "\n${COLOR_RED}${1}${COLOR_STANDARD}\n"
+}
+
+if [[ $(git checkout master) ]]; then
+        print_ok "Pulling latest code..."
+        git pull
+        print_ok "Looking for local branches that were removed in remote..."
+        git fetch -p
+        if [[ $(git branch -vv | awk '/: gone]/{print $1}') ]]; then
+                print_ok "Will delete the following branches:"
+                git branch -vv | awk '/: gone]/{print $1}'
+                echo ""
+                git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D
+        else
+                print_error "No branches to purge. Current branches:"
+                git branch
+                exit 1
+        fi
+        print_ok "Old branches deleted. Remaining local branches:"
+        git branch -vv
+        print_ok "[DONE]"
+else
+        print_error "Didn't find branch \"master\". Unable to continue."
+        exit 1
+fi
