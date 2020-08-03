@@ -1,7 +1,10 @@
 #!/bin/bash
-# save this file as /usr/local/bin/git-purge; chwon 755 /usr/local/bin/git-purge
+# save this file as /usr/local/bin/git-purge; chmod 755 /usr/local/bin/git-purge
 # -rwxr-xr-x 1 root root 912 Apr  1 10:47 /usr/local/bin/git-purge*
+# run 'git-purge' from inside a repo
 set -e
+
+MAIN_BRANCH='master'# POSSIBLE VALUES: development, develop, etc
 
 COLOR_RED='\033[0;31m'
 COLOR_GREEN='\033[0;32m'
@@ -15,7 +18,7 @@ function print_error {
     printf "\n${COLOR_RED}${1}${COLOR_STANDARD}\n"
 }
 
-if [[ $(git checkout master) ]]; then
+if [[ $(git checkout ${MAIN_BRANCH}) ]]; then
         print_ok "Pulling latest code..."
         git pull
         print_ok "Looking for local branches that were removed in remote..."
@@ -34,6 +37,6 @@ if [[ $(git checkout master) ]]; then
         git branch -vv
         print_ok "[DONE]"
 else
-        print_error "Didn't find branch \"master\". Unable to continue."
+        print_error "Didn't find branch \"${MAIN_BRANCH}\". Unable to continue."
         exit 1
 fi
